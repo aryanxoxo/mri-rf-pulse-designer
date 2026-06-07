@@ -213,8 +213,9 @@
       <h1>MRI Slice-Selective RF Pulse Designer</h1>
       <p class="lead">
         Built an interactive simulator that connects what an MRI operator selects
-        at the scanner console with the hidden RF pulse and gradient design that
-        excites a physical slice of tissue.
+        at the scanner console with the RF pulse and gradient design that excites
+        a physical slice of tissue, including preset comparisons for different
+        slice prescriptions.
       </p>
       <div class="actions">
         <a class="button primary" href="./app.py">View Streamlit source</a>
@@ -237,7 +238,7 @@
         <p>
           The scanner converts those choices into a shaped B1 pulse, RF
           bandwidth, slice-selection gradient Gz, and timing. This project makes
-          that hidden design layer visible.
+          that pulse-design layer visible.
         </p>
       </article>
       <article class="card">
@@ -261,9 +262,9 @@
     <section class="section card">
       <h2>Simulation Output</h2>
       <p>
-        The four panels show RF amplitude, RF spectrum, final magnetization, and
-        flip angle profile. The flip angle plot is the clearest view of the
-        selected slice.
+        The output shows RF amplitude, RF spectrum, final magnetization, flip
+        angle profile, and overlaid Bloch profiles for thin-slice, localizer,
+        sharp-edge, low-gradient, and inversion scenarios.
       </p>
       <p>&nbsp;</p>
       <img class="plot" src="./assets/simulation-preview.png" alt="MRI RF pulse simulation plots" />

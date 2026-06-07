@@ -7,8 +7,9 @@
     "Simulates rotating-frame Bloch equations without relaxation",
     "Normalizes RF amplitude for prescribed center-spin flip angle",
     "Visualizes RF pulse, RF spectrum, magnetization, and flip angle profile",
+    "Compares multiple scanner-style slice prescriptions in one Bloch-profile view",
     "Explains MRI operator-facing settings versus sequence-design parameters",
-    "Includes Streamlit controls for duration, gradient strength, slice thickness, TBW, flip angle, and numerical resolution"
+    "Includes Streamlit controls for duration, gradient strength, slice thickness, TBW, flip angle, preset selection, and numerical resolution"
   ],
   "technologies": [
     "Python",

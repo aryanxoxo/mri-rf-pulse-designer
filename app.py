@@ -33,6 +33,68 @@ if str(APP_DIR) not in sys.path:
 from simulation import SimulationParams, run_simulation
 
 
+PRESETS = {
+    "Balanced 5 mm excitation": {
+        "values": (90, 4.0, 20.0, 5.0, None),
+        "description": (
+            "A general-purpose 90 degree slice-selective excitation. It targets a "
+            "moderate 5 mm slice using a 4 ms RF pulse and a 20 mT/m gradient."
+        ),
+    },
+    "Thin 2 mm high-resolution slice": {
+        "values": (90, 6.0, 28.0, 2.0, None),
+        "description": (
+            "A higher-resolution slice prescription. It uses a stronger gradient "
+            "and longer RF pulse to keep the selected slab narrow."
+        ),
+    },
+    "Thick 10 mm localizer slice": {
+        "values": (70, 2.4, 16.0, 10.0, None),
+        "description": (
+            "A quick, broad scout-style excitation where coverage and speed matter "
+            "more than a sharp slice edge."
+        ),
+    },
+    "Sharp 3 mm TBW-optimized slice": {
+        "values": (90, 7.0, 32.0, 3.0, 14.0),
+        "description": (
+            "A sharper profile with a higher time-bandwidth product. This emphasizes "
+            "the tradeoff between cleaner slice edges and pulse complexity."
+        ),
+    },
+    "Low-gradient 8 mm body coil scenario": {
+        "values": (90, 5.5, 10.0, 8.0, None),
+        "description": (
+            "A lower-gradient prescription that needs a narrower RF bandwidth for "
+            "the same anatomical coverage."
+        ),
+    },
+    "Broad 180-degree inversion": {
+        "values": (180, 5.0, 12.0, 10.0, 8.0),
+        "description": (
+            "A wide inversion-style pulse. The center spin is targeted for 180 "
+            "degrees, flipping magnetization from +Mz toward -Mz."
+        ),
+    },
+    "Manual": {
+        "values": (90, 4.0, 20.0, 5.0, None),
+        "description": (
+            "Neutral starting values. Use this when you want to explore the design "
+            "space without assuming a particular imaging goal."
+        ),
+    },
+}
+
+
+COMPARISON_PRESETS = (
+    "Thin 2 mm high-resolution slice",
+    "Balanced 5 mm excitation",
+    "Thick 10 mm localizer slice",
+    "Sharp 3 mm TBW-optimized slice",
+    "Broad 180-degree inversion",
+)
+
+
 st.set_page_config(
     page_title="MRI RF Pulse Designer",
     page_icon="MRI",
@@ -270,48 +332,13 @@ def build_params() -> SimulationParams:
 
     preset = st.sidebar.selectbox(
         "Preset",
-        (
-            "Balanced 5 mm excitation",
-            "Thin 2 mm slice",
-            "Fast localizer",
-            "Broad 180-degree inversion",
-            "Manual",
-        ),
+        tuple(PRESETS.keys()),
         help="Start from a realistic RF design and then fine tune the sliders.",
     )
 
-    preset_values = {
-        "Balanced 5 mm excitation": (90, 4.0, 20.0, 5.0, None),
-        "Thin 2 mm slice": (90, 6.0, 28.0, 2.0, None),
-        "Fast localizer": (70, 2.4, 16.0, 8.0, None),
-        "Broad 180-degree inversion": (180, 5.0, 12.0, 10.0, 8.0),
-        "Manual": (90, 4.0, 20.0, 5.0, None),
-    }
-    preset_descriptions = {
-        "Balanced 5 mm excitation": (
-            "A general-purpose 90 degree slice-selective excitation. It targets a "
-            "moderate 5 mm slice using a 4 ms RF pulse and a 20 mT/m gradient."
-        ),
-        "Thin 2 mm slice": (
-            "A higher-resolution slice prescription. It uses a stronger gradient "
-            "and longer RF pulse to keep the selected slab narrow."
-        ),
-        "Fast localizer": (
-            "A quicker, broader excitation suitable for scout/localizer-style "
-            "imaging where speed matters more than a sharp slice edge."
-        ),
-        "Broad 180-degree inversion": (
-            "A wide inversion-style pulse. The center spin is targeted for 180 "
-            "degrees, flipping magnetization from +Mz toward -Mz."
-        ),
-        "Manual": (
-            "Neutral starting values. Use this when you want to explore the design "
-            "space without assuming a particular imaging goal."
-        ),
-    }
-    st.sidebar.info(preset_descriptions[preset])
+    st.sidebar.info(PRESETS[preset]["description"])
 
-    default_flip, default_duration, default_gradient, default_slice, default_tbw = preset_values[preset]
+    default_flip, default_duration, default_gradient, default_slice, default_tbw = PRESETS[preset]["values"]
 
     flip_angle_deg = st.sidebar.slider(
         "Target flip angle (degrees)",
@@ -520,6 +547,112 @@ def run_from_params(params: SimulationParams) -> dict[str, np.ndarray | float]:
         params.n_z,
         params.time_bandwidth,
     )
+
+
+def params_from_preset(name: str, base: SimulationParams) -> SimulationParams:
+    """Build a comparable simulation from one preset using current numerics."""
+
+    flip_deg, duration_ms, gradient_mt_m, slice_mm, tbw = PRESETS[name]["values"]
+    return SimulationParams(
+        duration=duration_ms * 1e-3,
+        gradient_gz=gradient_mt_m * 1e-3,
+        slice_thickness=slice_mm * 1e-3,
+        flip_angle_deg=float(flip_deg),
+        dt=base.dt,
+        z_min=base.z_min,
+        z_max=base.z_max,
+        n_z=base.n_z,
+        time_bandwidth=tbw,
+    )
+
+
+def render_slice_preset_comparison(base_params: SimulationParams) -> None:
+    """Compare Bloch slice profiles for scanner-style presets."""
+
+    st.markdown("### Bloch Slice Preset Comparison")
+    st.markdown(
+        """
+        This view reruns the Bloch simulation for several slice prescriptions using
+        the same spatial grid. It makes the tradeoff visible: thin slices need more
+        bandwidth or gradient strength, thick localizer slices are faster, and
+        inversion pulses change the final longitudinal magnetization.
+        """
+    )
+
+    selected = st.multiselect(
+        "Slice prescriptions to overlay",
+        COMPARISON_PRESETS,
+        default=list(COMPARISON_PRESETS[:4]),
+    )
+    if not selected:
+        st.info("Choose at least one preset to draw the comparison.")
+        return
+
+    rows = []
+    comparison = {}
+    for name in selected:
+        params = params_from_preset(name, base_params)
+        results = run_from_params(params)
+        summary = calculate_design_summary(results, params)
+        z_mm = np.asarray(results["z"]) * 1e3
+        flip_angle = np.asarray(results["flip_angle"])
+        final_m = np.asarray(results["final_m"])
+        comparison[name] = (z_mm, flip_angle, final_m[:, 2])
+        rows.append(
+            {
+                "Preset": name,
+                "Flip angle deg": params.flip_angle_deg,
+                "Slice mm": params.slice_thickness * 1e3,
+                "Gz mT/m": params.gradient_gz * 1e3,
+                "RF ms": params.duration * 1e3,
+                "TBW": float(results["time_bandwidth"]),
+                "Peak B1 uT": summary["peak_b1_ut"],
+                "Estimated slice mm": summary["estimated_slice_mm"],
+                "Stopband max deg": summary["stopband_flip"],
+            }
+        )
+
+    if go is not None:
+        fig = make_subplots(
+            rows=1,
+            cols=2,
+            subplot_titles=("Flip angle across position", "Final Mz across position"),
+            horizontal_spacing=0.09,
+        )
+        palette = ["#087f8c", "#6741d9", "#d9480f", "#2b8a3e", "#f08c00"]
+        for i, (name, (z_mm, flip_angle, mz)) in enumerate(comparison.items()):
+            color = palette[i % len(palette)]
+            fig.add_trace(
+                go.Scatter(x=z_mm, y=flip_angle, mode="lines", name=name, line=dict(color=color, width=3)),
+                row=1,
+                col=1,
+            )
+            fig.add_trace(
+                go.Scatter(x=z_mm, y=mz, mode="lines", name=name, line=dict(color=color, width=3), showlegend=False),
+                row=1,
+                col=2,
+            )
+        fig.update_xaxes(title_text="z position (mm)", row=1, col=1)
+        fig.update_xaxes(title_text="z position (mm)", row=1, col=2)
+        fig.update_yaxes(title_text="Flip angle (degrees)", row=1, col=1)
+        fig.update_yaxes(title_text="Mz", range=[-1.1, 1.1], row=1, col=2)
+        fig.update_layout(
+            height=560,
+            margin=dict(l=20, r=20, t=60, b=20),
+            legend=dict(orientation="h", yanchor="bottom", y=1.04, xanchor="right", x=1),
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#fbfcfe",
+            font=dict(color="#14213d", family="Inter, Segoe UI, Arial, sans-serif"),
+        )
+        fig.update_xaxes(gridcolor="#e8edf3", zerolinecolor="#cad2dd")
+        fig.update_yaxes(gridcolor="#e8edf3", zerolinecolor="#cad2dd")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        z_index = next(iter(comparison.values()))[0]
+        flip_df = pd.DataFrame({name: data[1] for name, data in comparison.items()}, index=z_index)
+        st.line_chart(flip_df)
+
+    st.dataframe(pd.DataFrame(rows).round(3), width="stretch", hide_index=True)
 
 
 def make_main_figure(results: dict[str, np.ndarray | float], params: SimulationParams):
@@ -991,8 +1124,8 @@ def main() -> None:
     render_quick_guide(params)
     render_metrics(results, params)
 
-    console_tab, mri_tab, profile_tab, notes_tab = st.tabs(
-        ["Pulse Console", "MRI Workflow", "Profile Detail", "Physics Notes"]
+    console_tab, preset_tab, mri_tab, profile_tab, notes_tab = st.tabs(
+        ["Pulse Console", "Slice Presets", "MRI Workflow", "Profile Detail", "Physics Notes"]
     )
 
     with console_tab:
@@ -1001,6 +1134,9 @@ def main() -> None:
             render_fallback_charts(results, params)
         else:
             st.plotly_chart(figure, use_container_width=True)
+
+    with preset_tab:
+        render_slice_preset_comparison(params)
 
     with mri_tab:
         render_mri_context(params, results)

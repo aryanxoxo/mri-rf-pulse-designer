@@ -32,6 +32,10 @@ The app opens a browser dashboard with controls for:
 - time-bandwidth product
 - numerical resolution
 
+It also includes scanner-style presets and a comparison tab for overlaying
+multiple Bloch-equation slice profiles, including thin-slice, localizer,
+sharp-edge, low-gradient, and inversion pulse scenarios.
+
 ## Files
 
 - `app.py`: Streamlit dashboard
