@@ -1,0 +1,29 @@
+{
+  "title": "MRI Slice-Selective RF Pulse Designer",
+  "category": "Medical Imaging - Simulation",
+  "summary": "Interactive Bloch-equation simulator showing how MRI scanner console choices map to RF pulse and slice-selection gradient design.",
+  "description": "Built a Python and Streamlit simulator for slice-selective MRI excitation. The app models a Hamming-windowed sinc RF pulse, constant Gz slice-selection gradient, position-dependent off-resonance, and final magnetization across spatial position. It bridges the clinical operator workflow, such as choosing slice thickness and flip angle, with the underlying RF waveform, bandwidth, gradient strength, and Bloch dynamics.",
+  "highlights": [
+    "Simulates rotating-frame Bloch equations without relaxation",
+    "Normalizes RF amplitude for prescribed center-spin flip angle",
+    "Visualizes RF pulse, RF spectrum, magnetization, and flip angle profile",
+    "Explains MRI operator-facing settings versus sequence-design parameters",
+    "Includes Streamlit controls for duration, gradient strength, slice thickness, TBW, flip angle, and numerical resolution"
+  ],
+  "technologies": [
+    "Python",
+    "NumPy",
+    "SciPy",
+    "Matplotlib",
+    "Streamlit",
+    "Plotly",
+    "MRI Physics",
+    "Bloch Equations"
+  ],
+  "artifacts": {
+    "interactive_app": "app.py",
+    "standalone_script": "simulation.py",
+    "plot_preview": "assets/simulation-preview.png",
+    "project_page": "project.html"
+  }
+}

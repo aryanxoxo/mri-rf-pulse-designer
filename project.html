@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MRI RF Pulse Designer | Project</title>
+  <style>
+    :root {
+      --ink: #14213d;
+      --muted: #5d6678;
+      --line: #d9e1ea;
+      --panel: #ffffff;
+      --soft: #f5f8fb;
+      --cyan: #087f8c;
+      --violet: #6741d9;
+      --amber: #f08c00;
+      --red: #d9480f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f8fafc 0%, #edf3f8 48%, #ffffff 100%);
+      line-height: 1.55;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 54px;
+    }
+
+    .hero {
+      border: 1px solid rgba(20, 33, 61, 0.14);
+      background:
+        radial-gradient(circle at 12% 14%, rgba(8, 127, 140, 0.14), transparent 29%),
+        radial-gradient(circle at 87% 12%, rgba(240, 140, 0, 0.16), transparent 24%),
+        linear-gradient(135deg, #ffffff 0%, #eef6f8 58%, #f9fbfd 100%);
+      border-radius: 8px;
+      padding: 32px;
+      box-shadow: 0 18px 48px rgba(20, 33, 61, 0.08);
+    }
+
+    .eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      border: 1px solid rgba(8, 127, 140, 0.24);
+      background: rgba(255, 255, 255, 0.76);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.79rem;
+      font-weight: 700;
+    }
+
+    h1 {
+      max-width: 820px;
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 820px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 750;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    .button.primary {
+      color: #ffffff;
+      background: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .section {
+      margin-top: 26px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid rgba(20, 33, 61, 0.12);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 10px 28px rgba(20, 33, 61, 0.06);
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 8px;
+      letter-spacing: 0;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .plot {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 10px 28px rgba(20, 33, 61, 0.06);
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e7edf4;
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f6fa;
+      color: var(--ink);
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      border-left: 4px solid var(--amber);
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 10px 28px rgba(20, 33, 61, 0.06);
+    }
+
+    .step strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="badge">MRI physics</span>
+        <span class="badge">RF pulse design</span>
+        <span class="badge">Bloch simulation</span>
+        <span class="badge">Streamlit app</span>
+      </div>
+      <h1>MRI Slice-Selective RF Pulse Designer</h1>
+      <p class="lead">
+        Built an interactive simulator that connects what an MRI operator selects
+        at the scanner console with the hidden RF pulse and gradient design that
+        excites a physical slice of tissue.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="./app.py">View Streamlit source</a>
+        <a class="button" href="./simulation.py">View simulation script</a>
+        <a class="button" href="./assets/simulation-preview.png">Open plot output</a>
+      </div>
+    </section>
+
+    <section class="section grid">
+      <article class="card">
+        <h2>What the MRI operator sees</h2>
+        <p>
+          The operator chooses clinical settings such as slice thickness in mm,
+          flip angle in degrees, scan plane, and sequence type. The interface is
+          designed around anatomy and image contrast, not raw RF waveforms.
+        </p>
+      </article>
+      <article class="card">
+        <h2>What happens underneath</h2>
+        <p>
+          The scanner converts those choices into a shaped B1 pulse, RF
+          bandwidth, slice-selection gradient Gz, and timing. This project makes
+          that hidden design layer visible.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Core physics</h2>
+        <p>
+          The simulator integrates the rotating-frame Bloch equation
+          dM/dt = gamma M x Beff across positions from -10 mm to +10 mm, using a
+          Hamming-windowed sinc RF pulse and constant Gz gradient.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Why it matters</h2>
+        <p>
+          Slice-selective excitation is how MRI targets a slab of tissue before
+          readout. The RF spectrum and gradient together decide which positions
+          are tipped into the transverse plane.
+        </p>
+      </article>
+    </section>
+
+    <section class="section card">
+      <h2>Simulation Output</h2>
+      <p>
+        The four panels show RF amplitude, RF spectrum, final magnetization, and
+        flip angle profile. The flip angle plot is the clearest view of the
+        selected slice.
+      </p>
+      <p>&nbsp;</p>
+      <img class="plot" src="./assets/simulation-preview.png" alt="MRI RF pulse simulation plots" />
+    </section>
+
+    <section class="section">
+      <table>
+        <thead>
+          <tr>
+            <th>Clinical console setting</th>
+            <th>Hidden RF/gradient design</th>
+            <th>Shown in the simulator</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Slice thickness (mm)</td>
+            <td>RF bandwidth and Gz are selected so only that slab resonates.</td>
+            <td>Target slice thickness, RF spectrum, flip angle profile.</td>
+          </tr>
+          <tr>
+            <td>Flip angle (degrees)</td>
+            <td>B1 pulse area is scaled to rotate the center spin by that angle.</td>
+            <td>Peak B1, center flip, final magnetization.</td>
+          </tr>
+          <tr>
+            <td>Scan plane and slice location</td>
+            <td>The gradient axis and RF center frequency are adjusted.</td>
+            <td>This simplified version models the z-axis only.</td>
+          </tr>
+          <tr>
+            <td>Sequence type</td>
+            <td>Pulse shape, gradient timing, echo timing, and readout are scheduled.</td>
+            <td>The app focuses on the excitation pulse before readout.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section steps">
+      <div class="step">
+        <strong>Operator instruction: choose anatomy and plane.</strong>
+        The scanner translates axial, sagittal, or coronal planning into a
+        physical gradient direction.
+      </div>
+      <div class="step">
+        <strong>Operator instruction: enter slice thickness.</strong>
+        The system maps the requested thickness to RF bandwidth and gradient
+        strength.
+      </div>
+      <div class="step">
+        <strong>Operator instruction: choose flip angle and sequence.</strong>
+        The scanner scales RF pulse area while checking hardware and safety
+        limits.
+      </div>
+      <div class="step">
+        <strong>Behind the design: solve spin dynamics.</strong>
+        The Bloch equation predicts how magnetization rotates at each position
+        under the effective RF plus gradient field.
+      </div>
+    </section>
+  </main>
+</body>
+</html>
