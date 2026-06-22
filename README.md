@@ -1,4 +1,6 @@
-# MRI Slice-Selective RF Pulse Designer
+﻿# MRI Slice-Selective RF Pulse Designer
+
+> Public archive note: this repository is a portfolio/demo-safe version prepared from private working repositories/materials; sensitive details, credentials, raw logs, and proprietary context are intentionally omitted.
 
 Interactive Python simulator for MRI slice-selective RF excitation.
 
